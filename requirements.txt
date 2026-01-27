@@ -15,4 +15,4 @@ docta.ai
 gradio>=3.50.2
 seaborn
 torchvision==0.20.1
-open_clip_torch==2.18.0
+# open_clip_torch==2.18.0

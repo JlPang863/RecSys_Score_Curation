@@ -1,32 +1,42 @@
+#!/usr/bin/env bash
+export PYTHONPATH=$(pwd)
 
-dataset='utilitarian'
+############################
+# Config
+############################
+ROOT_DATA_PATH="raw_data"
 
-dataset_path="${dataset}.json" 
+DATASET="utilitarian"
+DATASET_PATH="${ROOT_DATA_PATH}/${DATASET}.json"
+OUTPUT_DIR="result/"
+FEATURE_KEY="embed_text"
+SCORE_KEY="bin_score"
+CONFIG="template.py"
 
-output_dir="score_curation_results/"
-feature_keywords='embed_text'
-score_keywords="bin_score"
+echo "======================================"
+echo "*** Processing dataset: ${DATASET} ***"
+echo "======================================"
 
-echo "*** Processing dataset: ${dataset} ***"
+############################
+# Step 1: Raw Score Diagnosis
+############################
+echo "*** [1/2] Running score diagnosis... *** "
+python score_curation/data_diagnose.py \
+    --config "${CONFIG}" \
+    --dataset_name "${DATASET}" \
+    --dataset_path "${DATASET_PATH}" \
+    --output_dir "${OUTPUT_DIR}" \
+    --feature_key "${FEATURE_KEY}" \
+    --score_key "${SCORE_KEY}"
 
-#####################################
-##### Raw Score Error Detection #####
-#####################################
-python3 diagnose.py \
-    --config template.py \
-    --dataset_name $dataset \
-    --output_dir $output_dir \
-    --feature_keywords $feature_keywords \
-    --score_keywords $score_keywords \
-    --dataset_path $dataset_path
+############################
+# Step 2: Score Curation
+############################
+echo "*** [2/2] Running score curation... ***"
+python score_curation/data_curation.py \
+    --dataset_name "${DATASET}" \
+    --dataset_path "${DATASET_PATH}" \
+    --output_dir "${OUTPUT_DIR}" \
+    --score_key "${SCORE_KEY}"
 
-
-#####################################
-##########  Score Curation ##########
-#####################################
-python score_generation.py \
-    --dataset_name $dataset \
-    --score_keywords $score_keywords \
-    --dataset_path $dataset_path \
-    --output_dir $output_dir \
-    --dataset_path $dataset_path
+echo "✅ Pipeline finished successfully."

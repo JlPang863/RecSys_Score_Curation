@@ -137,16 +137,6 @@ dmypy.json
 .pyre/
 
 
-#models & datas
-
-selected_data
-model_finetune/raw_data/
-score_curation_results/
-scoring_output/
-model_output/
-figures/
-demo_test.ipynb
-
 # *.pt
 *csv
 *.yaml

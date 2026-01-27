@@ -38,8 +38,8 @@ class RecSysDataset(CustomizedDataset):
                 
                 
     def load_data_info(self, args, dataset):
-        features = dataset[args.feature_keywords]
-        scores = dataset[args.score_keywords]
+        features = dataset[args.feature_key]
+        scores = dataset[args.score_key]
 
         return features, np.array(scores)
 

@@ -10,37 +10,75 @@ This project applies the DS2 (ICLR 2025) framework for data score curation to re
 **Mentor**: Jingjing Liu
 
 ------ 
+---
 
-## 🎉🎉 Progress 
-- [x] [2026.01.26] 🚀🚀 Adjust the code from [**DS2**](https://github.com/UCSC-REAL/DS2).
+## 🚀 Project Progress
 
+- [x] **2026.01.26** — Refactored and adapted the original [DS2](https://github.com/UCSC-REAL/DS2) codebase for recommendation system data  
+- [x] Modularized the workflow into diagnosis and curation stages  
+- [x] Added an end-to-end pipeline interface for programmatic usage  
 
-### 🧩 Step 1. Raw Score Error Detection
-One can execute the score error detection by running
+---
+
+## 🔧 Overview
+
+The project consists of two main stages:
+
+1. **Score Diagnosis**
+   - Detect mislabeled or inconsistent scores
+   - Identify rare or long-tail samples using embedding similarity
+   - Produce a diagnostic report
+
+2. **Score Curation**
+   - Revise noisy scores using confidence-based correction
+   - Incorporate diversity-aware signals
+   - Write curated scores back into the dataset
+
+The final dataset includes three additional fields:
+- `curated_score`
+- `diversity_score`
+- `final_curated_score`
+
+## 🧩 Option 1: Run the Full Pipeline via Script (Recommended)
+
+For most users, the easiest way to run the entire pipeline is via the provided shell script:
+
+```bash
+bash data_curating.sh
 ```
-python diagnose.py
-```
-The corresponding curation report files can be found in the path `score_curation_results/`.
+
+All corresponding curation report files can be found in the path `result`.
 
 
 ---
 
-### 🧩 Step 2. Score Curation
-Given the generated score curation reports, one can directly obtain the curated score by 
+## 🧩 Option 2: Use the Python Pipeline Interface
+
+For programmatic usage (e.g., research workflows, notebooks, or system integration), the pipeline can be invoked directly in Python:
+
+```python
+
+from pipeline_utils import ScoreCurationPipeline
+import os
+
+pipeline = ScoreCurationPipeline(
+    config_path="template.py",
+    dataset_name="utilitarian",
+    dataset_path=os.path.join("raw_data", "utilitarian.json"),
+    feature_key="embed_text",
+    score_key="bin_score",
+    output_dir="results/",
+)
+
+outputs = pipeline.run()
+
+curated_dataset = outputs["dataset"]
+report = outputs["report"]
+
 ```
-python score_generation.py
-``` 
 
+This interface runs both diagnosis and curation sequentially and returns:
 
+-  curated dataset
 
-The generated scores are encoded into original dataset, using `keyword`: `curated_score`, `diversity_score`, and their combined score `final_curated_score`.
-
-
-
-
-### 🧩 Step 2. Score Curation
-For convenience, one can directly obtain all curated scores with original dataset by 
-```
-bash data_curating.sh
-
-``` 
+- full diagnosis report
