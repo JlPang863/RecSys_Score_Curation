@@ -1,9 +1,6 @@
-wandb
-data/*
-raw_data/*
+
 
 # !data/processed
-output/
 beaker_configs/auto_created
 
 # Byte-compiled / optimized / DLL files
