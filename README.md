@@ -5,8 +5,9 @@ This project applies the DS2 (ICLR 2025) framework for data score curation to re
 
 **Google Search Team — LLM Data Augmentation Project**
 
-Manager: Shuang Yang
-Mentor: Jingjing Liu
+**Manager**: Shuang Yang
+
+**Mentor**: Jingjing Liu
 
 ------ 
 
