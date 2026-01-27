@@ -47,7 +47,6 @@ def score_curating(reports, raw_dataset, confidence_prob):
     # Change the original scores to the suggested score
     # scores = torch.load(score_path + "output_scores_revised.pt")
     scores = raw_dataset[args.score_keywords][:]
-    import pdb;pdb.set_trace()
     for sample_score in curated_sample_scores:
         scores[sample_score[0]] = sample_score[1]
         

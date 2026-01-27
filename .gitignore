@@ -150,4 +150,4 @@ demo_test.ipynb
 # *.pt
 *csv
 *.yaml
-*.json
+# *.json
