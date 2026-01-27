@@ -171,43 +171,47 @@ def calc_func(cfg, c_est):
 
 
 def get_consensus_patterns(dataset, sample, k=50, batch_size=1024):
-    """ KNN estimation with batched processing """
-    # 获取 features 和 labels
+    """KNN estimation with batched processing"""
+
+    # Retrieve features and labels
     feature = dataset.feature if isinstance(dataset.feature, torch.Tensor) else torch.tensor(dataset.feature)
     label = dataset.label if isinstance(dataset.label, torch.Tensor) else torch.tensor(dataset.label)
 
+    # Select sampled subset
     feature = feature[sample]
     label = label[sample]
 
     num_samples = feature.size(0)
-    
+
     all_knn_labels = []
     all_values = []
-    import torch.nn.functional as F
-    feature_normalized = F.normalize(feature.float(), dim=1).to('cuda').half()
 
-    # 分批处理 features
+    import torch.nn.functional as F
+    # Normalize features and move to GPU for cosine distance computation
+    feature_normalized = F.normalize(feature.float(), dim=1).to("cuda").half()
+
+    # Process features in batches to reduce memory usage
     for i in range(0, num_samples, batch_size):
         end_i = min(i + batch_size, num_samples)
         batch_features = feature[i:end_i]
 
-        # 计算当前批次的距离矩阵
+        # Compute the distance matrix for the current batch
         dist = cosDistance_chunked(batch_features.float(), feature_normalized)
-        
-        # 获取每个样本的 k 个最近邻
+
+        # Retrieve the k nearest neighbors for each sample
         values, indices = dist.topk(k, dim=1, largest=False, sorted=True)
-        
-        # 将结果从 GPU 移动到 CPU
+
+        # Move results from GPU to CPU
         values = values.cpu()
         indices = indices.cpu()
 
-        # 获取对应的 knn_labels
+        # Retrieve labels corresponding to the nearest neighbors
         knn_labels = label[indices]
-        
+
         all_knn_labels.append(knn_labels)
         all_values.append(values)
 
-    # 将所有批次的结果合并
+    # Concatenate results from all batches
     all_knn_labels = torch.cat(all_knn_labels, dim=0)
     all_values = torch.cat(all_values, dim=0)
 

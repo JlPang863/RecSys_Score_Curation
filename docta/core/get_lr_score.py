@@ -36,7 +36,6 @@ def score_from_embedding(data, k):
     # To clarify, the label here is just a placeholder and is not used
 #     label = [0 for i in range(len(data))] 
     print("Customizing the extracted embeddings as a dataset...")
-#     import pdb; pdb.set_trace()
 
 #     dataset = CustomizedDataset(feature=data, label=label)
     sample = np.arange(len(data))

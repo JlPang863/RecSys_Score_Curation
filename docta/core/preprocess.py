@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from docta.datasets import CustomizedDataset, Customize_Image_Folder, Cifar10_clean
+from docta.datasets import CustomizedDataset
 from docta.datasets.data_utils import load_embedding
 from .core_utils import mean_pooling
 import open_clip
