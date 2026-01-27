@@ -9,7 +9,6 @@ This project applies the DS2 (ICLR 2025) framework for data score curation to re
 
 **Mentor**: Jingjing Liu
 
------- 
 ---
 
 ## 🚀 Project Progress
@@ -39,7 +38,7 @@ The final dataset includes three additional fields:
 - `diversity_score`
 - `final_curated_score`
 
-## 🧩 Option 1: Run the Full Pipeline via Script (Recommended)
+## 🧩 Option 1: Run the Full Pipeline via Script 
 
 For most users, the easiest way to run the entire pipeline is via the provided shell script:
 
@@ -52,7 +51,7 @@ All corresponding curation report files can be found in the path `result`.
 
 ---
 
-## 🧩 Option 2: Use the Python Pipeline Interface
+## 🧩 Option 2: Use the Python Pipeline Interface (Recommended)
 
 For programmatic usage (e.g., research workflows, notebooks, or system integration), the pipeline can be invoked directly in Python:
 
