@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('--dataset_path', help='raw dataset path', default='utilitarian.json')
     parser.add_argument('--feature_keywords', help='feature keyword in the raw dataset', default='embed_text')
     parser.add_argument('--score_keywords', help='score keyword in the raw dataset needed to be curated', default='bin_score')
+    parser.add_argument('--num_classes', help='the number of score classification used', default=None)
 
     parser.add_argument('--output_dir', help='output dir', default='score_curation_results/')
     args = parser.parse_args()
@@ -33,15 +34,12 @@ cfg = Config.fromfile(args.config)
 
 #### Required Input
 cfg.dataset_type = args.dataset_name
-# cfg.feature_keywords = args.feature_keywords
-# cfg.score_keywords = args.score_keywords
-
 cfg.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# cfg.data_root = args.score_root_path
 cfg.save_path =  args.output_dir 
 cfg.preprocessed_dataset_path = cfg.save_path + f'dataset_{args.dataset_name}.pt'
 
+if args.num_classes: 
+    cfg.num_classes = args.num_classes 
 
 dataset = RecSysDataset(cfg, args, split='train')
 
@@ -51,13 +49,10 @@ print(f'Dataset {args.dataset_name} load finished')
 '''preprocess data'''
 pre_processor = Preprocess(cfg, dataset)
 pre_processor.encode_feature()
-print(pre_processor.save_ckpt_idx)
+print(pre_processor.save_ckpt_idx) #[start_idx, end_idx (not-include)]
 
 
 data_path = lambda x: cfg.save_path + f'embedded_{cfg.dataset_type}_{x}.pt'
-
-import pdb;pdb.set_trace()
-
 dataset, _ = load_embedding(pre_processor.save_ckpt_idx, data_path, duplicate=True) ## duplicate dataset
 
 

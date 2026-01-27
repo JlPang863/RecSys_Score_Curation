@@ -58,7 +58,6 @@ def extract_embedding(cfg, encoder, dataset_list):
                 save_cnt += 1
 
         if len(dataset_label) > 0:   
-            # import pdb; pdb.set_trace()
 
             save_extracted_dataset(cfg, dataset_embedding, dataset_label, dataset_idx, save_cnt)
             dataset_embedding, dataset_idx, dataset_label = [], [], []
