@@ -7,20 +7,20 @@ import torch
 import argparse
 
 from docta.utils.config import Config
-from docta.datasets import TULU_RLHF
+from docta.datasets import RecSysDataset
 from docta.core.preprocess import Preprocess
 from docta.datasets.data_utils import load_embedding
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a classifier')
-    parser.add_argument('--config', help='train config file path', default='tulu_template.py')
-    parser.add_argument('--dataset_name', help='tulu dataset name', default='tulu_300k')
-    parser.add_argument('--rating_model', help='model full name', default='meta-llama/Meta-Llama-3.1-8B-Instruct')
-    parser.add_argument('--score_root_path', help='root path of scores', default='../scoring_output/')
-    parser.add_argument('--output_dir', help='output dir', default='../score_curation_results/')
+    parser.add_argument('--config', help='train config file path', default='template.py')
+    parser.add_argument('--dataset_name', help='dataset name for score curation', default='utilitarian')
+    parser.add_argument('--dataset_path', help='raw dataset path', default='utilitarian.json')
+    parser.add_argument('--feature_keywords', help='feature keyword in the raw dataset', default='embed_text')
+    parser.add_argument('--score_keywords', help='score keyword in the raw dataset needed to be curated', default='bin_score')
 
-
+    parser.add_argument('--output_dir', help='output dir', default='score_curation_results/')
     args = parser.parse_args()
     return args
 
@@ -29,16 +29,21 @@ def parse_args():
 '''load data'''
 args = parse_args()
 cfg = Config.fromfile(args.config)
-cfg.data_root = args.score_root_path
-cfg.file_name = args.dataset_name
+
+
+#### Required Input
 cfg.dataset_type = args.dataset_name
+# cfg.feature_keywords = args.feature_keywords
+# cfg.score_keywords = args.score_keywords
 
-cfg.save_path =  args.output_dir + f'{args.rating_model}/{args.dataset_name}/'
-cfg.preprocessed_dataset_path = cfg.save_path + f'dataset_{args.dataset_name}.pt'
 cfg.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-cfg.score_path = cfg.data_root + f'{args.rating_model}/{args.dataset_name}/output_scores_revised.pt' ## raw labels 
 
-dataset = TULU_RLHF(cfg, args, train=True)
+# cfg.data_root = args.score_root_path
+cfg.save_path =  args.output_dir 
+cfg.preprocessed_dataset_path = cfg.save_path + f'dataset_{args.dataset_name}.pt'
+
+
+dataset = RecSysDataset(cfg, args, split='train')
 
 print(f'Dataset {args.dataset_name} load finished')
 
@@ -50,6 +55,9 @@ print(pre_processor.save_ckpt_idx)
 
 
 data_path = lambda x: cfg.save_path + f'embedded_{cfg.dataset_type}_{x}.pt'
+
+import pdb;pdb.set_trace()
+
 dataset, _ = load_embedding(pre_processor.save_ckpt_idx, data_path, duplicate=True) ## duplicate dataset
 
 

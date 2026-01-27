@@ -3,16 +3,13 @@ seed = 0
 modality = 'text' # image, text, tabular
 num_classes = 6  ## Number of score categories
 
-rating_model = 'meta/llama-3.1-8b-instruct'
-dataset_name = 'tulu_300k'
-
 
 feature_type = 'embedding'
 details = False
 
 
-# embedding_model = 'sentence-transformers/all-mpnet-base-v2'
-embedding_model = 'BAAI/bge-large-en-v1.5'
+embedding_model = 'sentence-transformers/all-mpnet-base-v2'
+# embedding_model = 'BAAI/bge-large-en-v1.5'
 embedding_cfg = dict(
     shuffle = False,
     batch_size = 256,  
