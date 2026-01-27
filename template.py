@@ -8,8 +8,8 @@ feature_type = 'embedding'
 details = False
 
 
-embedding_model = 'sentence-transformers/all-mpnet-base-v2'
-# embedding_model = 'BAAI/bge-large-en-v1.5'
+# embedding_model = 'sentence-transformers/all-mpnet-base-v2'
+embedding_model = 'BAAI/bge-large-en-v1.5'
 embedding_cfg = dict(
     shuffle = False,
     batch_size = 256,  

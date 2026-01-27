@@ -59,7 +59,7 @@ def run_diagnose(
         feature_key=cfg.feature_key,
         score_key=cfg.score_key,
         output_dir=output_dir,
-        num_classes=num_classes,
+        num_classes=cfg.num_classes,
     )
 
     dataset = RecSysDataset(cfg, args_like, split="train")

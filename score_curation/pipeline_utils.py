@@ -29,6 +29,7 @@ class ScoreCurationPipeline:
         feature_key: str = "embed_text",
         score_key: str = "bin_score",
         output_dir: str = "results",
+        num_classes: int = 2,
     ):
         """
         Initialize the score curation pipeline.
@@ -47,7 +48,8 @@ class ScoreCurationPipeline:
         self.feature_key = feature_key
         self.score_key = score_key
         self.output_dir = output_dir
-
+        self.num_classes = num_classes
+        
         # Load base configuration
         from docta.utils.config import Config
         self.cfg = Config.fromfile(config_path)
@@ -58,7 +60,7 @@ class ScoreCurationPipeline:
         self.cfg.feature_key = feature_key
         self.cfg.score_key = score_key
         self.cfg.save_path = output_dir
-
+        
     # -----------------------------
     # Stage 1: Diagnosis
     # -----------------------------
@@ -82,6 +84,7 @@ class ScoreCurationPipeline:
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
             output_dir=self.output_dir,
+            num_classes=self.num_classes,
             feature_key=self.feature_key,
             score_key = self.score_key,
         )

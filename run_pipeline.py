@@ -9,7 +9,7 @@ root_data_path = 'raw_data'
 dataset_name = "utilitarian"          # Name of the dataset
 feature_key = "embed_text"             # Feature field used for embedding
 score_key = "bin_score"                # Original score field to be curated
-
+num_classes = 2
 # Output directory for reports and curated datasets
 output_dir = 'results/'
 
@@ -25,6 +25,7 @@ pipeline = ScoreCurationPipeline(
     feature_key=feature_key,                                  # Feature column name
     score_key=score_key,                                      # Score column name
     output_dir=output_dir,                                    # Output directory
+    num_classes=num_classes,
 )
 
 # Run the full pipeline (diagnosis + curation)
