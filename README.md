@@ -23,10 +23,22 @@ The corresponding curation report files can be found in the path `score_curation
 
 ---
 
-### 🧩 Step 3. Score Curation
+### 🧩 Step 2. Score Curation
 Given the generated score curation reports, one can directly obtain the curated score by 
 ```
 python score_generation.py
 ``` 
+
+
+
 The generated scores are encoded into original dataset, using `keyword`: `curated_score`, `diversity_score`, and their combined score `final_curated_score`.
 
+
+
+
+### 🧩 Step 2. Score Curation
+For convenience, one can directly obtain all curated scores with original dataset by 
+```
+bash data_curating.sh
+
+``` 
