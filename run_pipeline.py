@@ -36,7 +36,7 @@ outputs = pipeline.run()
 curated_dataset = outputs["dataset"]    # Dataset with curated and augmented scores
 report = outputs["report"]              # Diagnosis report (transition matrix, rare samples, etc.)
 
-# present mis-corrpted samples
+# present mis-corrupted samples
 
 selected_size=10
 curated_samples_info = report.curation['score_curation']  # (idx, score, confidence)
