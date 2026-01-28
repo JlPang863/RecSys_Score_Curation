@@ -93,6 +93,8 @@ def run_diagnose(
     torch.save(report, report_path)
     print(f'Report saved to {report_path}')
 
+    return report
+
 if __name__ == "__main__":
     args = parse_args()
     cfg = Config.fromfile(args.config)

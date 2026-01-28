@@ -35,6 +35,15 @@ outputs = pipeline.run()
 curated_dataset = outputs["dataset"]    # Dataset with curated and augmented scores
 report = outputs["report"]              # Diagnosis report (transition matrix, rare samples, etc.)
 
+# present mis-corrpted samples
+curated_samples_info = report.curation['score_curation']  # (idx, score, confidence)
+idx_list = [int(item[0]) for item in curated_samples_info]
+curated_subset = curated_dataset.select(idx_list)
 
+for i, (idx, score, confidence) in enumerate(curated_samples_info):
+    print(f"\n==== sample {i} (orig_idx={int(idx)}) ====")
+    print(f"bin_score={int(score)}, confidence={float(confidence):.2f}")
+    print(curated_subset[i])
+    
 # Optionally save the curated dataset to disk
 # curated_dataset.to_json(f"{dataset_name}_curated.json")

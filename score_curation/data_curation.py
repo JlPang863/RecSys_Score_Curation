@@ -35,7 +35,7 @@ def score_curating(reports, raw_dataset, score_key, confidence_prob):
         if sample[2] >= confidence_prob:  
             curated_sample.append(sample[0])
             curated_sample_scores.append((int(sample[0]), int(sample[1]), round(sample[2], 2)))
-
+    
     print(f"Curated sample size: {len(curated_sample_scores)}")
 
     # Filter out some cured samples from corrupted instances
