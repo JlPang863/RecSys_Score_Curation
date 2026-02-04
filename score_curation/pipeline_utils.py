@@ -1,3 +1,4 @@
+import os
 
 from score_curation import run_diagnose
 from score_curation import run_curation
@@ -30,6 +31,7 @@ class ScoreCurationPipeline:
         score_key: str = "bin_score",
         output_dir: str = "results",
         num_classes: int = 2,
+        confidence_prob: float = 0.5,
     ):
         """
         Initialize the score curation pipeline.
@@ -47,9 +49,15 @@ class ScoreCurationPipeline:
         self.dataset_path = dataset_path
         self.feature_key = feature_key
         self.score_key = score_key
-        self.output_dir = output_dir
         self.num_classes = num_classes
-        
+        self.confidence_prob = confidence_prob
+
+        # Build full output path: output_dir/dataset_name
+        self.output_dir = os.path.join(output_dir, dataset_name)
+
+        # Ensure output directory exists
+        os.makedirs(self.output_dir, exist_ok=True)
+
         # Load base configuration
         from docta.utils.config import Config
         self.cfg = Config.fromfile(config_path)
@@ -113,7 +121,7 @@ class ScoreCurationPipeline:
             dataset_path=self.dataset_path,
             output_dir=self.output_dir,
             score_key=self.score_key,
-            confidence_prob=0.5,  # Confidence threshold for score revision
+            confidence_prob=self.confidence_prob,  # Confidence threshold for score revision
         )
         return self.curated_dataset
 
