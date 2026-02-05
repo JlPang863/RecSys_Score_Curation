@@ -13,6 +13,8 @@ This project applies the DS2 (ICLR 2025) framework for data score curation to re
 
 ## 🚀 Project Progress
 
+- [x] **2026.02.04** — Applied Score Curation on **Activity Timeline** dataset (with info: activity timeline, title)
+- [x] **2026.01.31** — Applied Score Curation on **Utilitarian** dataset (with info: title, salient labels)
 - [x] **2026.01.26** — Refactored and adapted the original [DS2](https://github.com/UCSC-REAL/DS2) codebase for recommendation system data  
 - [x] Modularized the workflow into diagnosis and curation stages  
 - [x] Added an end-to-end pipeline interface for programmatic usage  
