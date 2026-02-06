@@ -6,7 +6,7 @@ datasets
 peft
 sentencepiece
 bitsandbytes>=0.41.1
-protobuf==5.28.3
+protobuf
 scipy
 packaging
 tiktoken
