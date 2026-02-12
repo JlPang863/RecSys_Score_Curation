@@ -137,4 +137,10 @@ dmypy.json
 # *.pt
 *csv
 *.yaml
-# *.json
+*.json
+*.parquet
+*.npy
+
+# Large data / experiment outputs
+raw_data/
+runs/
