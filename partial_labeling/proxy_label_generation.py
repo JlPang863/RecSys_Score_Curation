@@ -19,6 +19,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--dataset_path", default="raw_data/tulu_300k_with_embeddings.parquet")
     parser.add_argument("--embedding_key", default="embeddings")
+    parser.add_argument("--embedding_path", default=None,
+                        help="Path to external .npy embedding file (overrides --embedding_key column)")
     parser.add_argument("--label_key", default="gpt_scores")
     parser.add_argument("--prediction_key", default="proxy_knn_label")
     parser.add_argument("--train_ratio", type=float, default=0.10)
@@ -282,11 +284,21 @@ def main() -> None:
 
     show_progress = not args.disable_tqdm
 
-    embeddings = stack_embedding_column(
-        df=df,
-        embedding_key=args.embedding_key,
-        show_progress=show_progress,
-    )
+    if args.embedding_path is not None:
+        print(f"[info] loading external embeddings from {args.embedding_path}")
+        embeddings = np.load(args.embedding_path).astype(np.float32)
+        if embeddings.shape[0] != len(df):
+            raise ValueError(
+                f"Embedding row count ({embeddings.shape[0]}) != dataset row count ({len(df)}). "
+                f"Make sure --data_pool_size matches."
+            )
+        print(f"[info] external embeddings shape: {embeddings.shape}")
+    else:
+        embeddings = stack_embedding_column(
+            df=df,
+            embedding_key=args.embedding_key,
+            show_progress=show_progress,
+        )
     labels = np.array([int(v) for v in df[args.label_key].tolist()], dtype=np.int64)
 
     train_idx, test_idx = split_indices(
@@ -344,6 +356,7 @@ def main() -> None:
     metrics = {
         "dataset_path": args.dataset_path,
         "embedding_key": args.embedding_key,
+        "embedding_path": args.embedding_path,
         "label_key": args.label_key,
         "num_rows": int(len(df)),
         "data_pool_size": int(pool_size) if pool_size is not None else None,
