@@ -288,7 +288,8 @@ def train_model(
     if is_ordinal:
         criterion = OrdinalLoss(num_classes)
     elif args.focal_loss:
-        criterion = FocalLoss(gamma=args.focal_gamma, weight=class_weights,
+        fw = class_weights.to(device) if class_weights is not None else None
+        criterion = FocalLoss(gamma=args.focal_gamma, weight=fw,
                               label_smoothing=args.label_smoothing)
     else:
         cw = class_weights.to(device) if class_weights is not None else None
