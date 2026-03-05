@@ -85,55 +85,36 @@ report = outputs["report"]
 
 ### Methods Explored
 
-| Method | Best Accuracy | Best Macro F1 | Verdict |
-|--------|:---:|:---:|---------|
-| **Skywork Fusion MLP** (embedding + text features) | **0.6009** | **0.5271** | Best overall |
-| Skywork kNN (reward embedding) | 0.5144 | 0.4119 | Decent baseline |
-| BGE kNN (semantic embedding) | 0.4826 | 0.3876 | Weak — embedding lacks quality signal |
-| Balanced dataset (18k) | 0.5720 | 0.5677 | Best F1 (proves class imbalance is main issue) |
-| Self-Training (5 rounds) | — | +2.5% F1 | Limited (pseudo-label accuracy ~50%) |
-| Ensemble (kNN + MLP) | +0.1% Acc | -1% F1 | Ineffective |
-| Class Weight / Oversample | -5% Acc | +1% F1 | Limited |
-| Cleanlab noise cleaning | -0.5% Acc | -2% F1 | Negative |
-| Label Propagation / C&S / APPNP | -5~6% Acc | -7~12% F1 | Negative |
-| Ordinal Regression | -5% Acc | -12% F1 | Negative |
-| Multi-annotator label fusion | -3~8% Acc | -7~19% F1 | Negative |
+| Method | Accuracy | Macro F1 | AUC | Verdict |
+|--------|:---:|:---:|:---:|---------|
+| **Skywork Fusion MLP** (emb + text feat) | **0.6009** | **0.5271** | **0.8952** | Best overall |
+| Balanced dataset (18k) | 0.5720 | 0.5677 | 0.8850 | Best F1 (class imbalance is main issue) |
+| Skywork kNN | 0.5144 | 0.4119 | — | Decent baseline |
+| BGE kNN | 0.4826 | 0.3876 | — | Weak — embedding lacks quality signal |
+| Self-Training / Ensemble / Class Weight | — | — | — | Limited improvement |
+| Cleanlab / C&S / APPNP / Label Propagation | — | — | — | Negative — all graph/noise methods fail |
 
 ### Key Findings
 
-1. **Data pool size is the biggest lever**: 300k 10% train (30k samples) outperforms 30k 90% train (27k samples) — larger pool provides more representative test sets and more minority-class samples
-2. **Embedding quality matters**: Skywork Reward embedding > BGE semantic embedding (+3% accuracy on average for kNN). Reward model hidden states carry quality signals
-3. **Shallow text features are surprisingly strong**: 35 hand-crafted features (length, formatting, structure) alone beat 1024-dim BGE embedding. Quality correlates with surface features
-4. **Early Fusion is the only effective enhancement**: embedding + text features complement each other. All "advanced" methods (ensemble, cleanlab, self-training, graph methods, etc.) fail to beat the simple Fusion MLP baseline
-5. **Factor ranking**: Data pool size > Embedding quality > Training data amount > Model capacity = Feature count
+1. **Data pool size > Embedding quality > Training data amount > Model capacity**: 300k 10% train outperforms 30k 90% train
+2. **Skywork Reward embedding > BGE semantic embedding**: +3% accuracy for kNN. Reward model hidden states carry quality signals
+3. **Early Fusion (embedding + text features) is the only effective enhancement**: all "advanced" methods fail to beat the simple Fusion MLP baseline
+4. **Class imbalance is the main bottleneck for Macro F1**: balanced 18k achieves F1=0.57 vs imbalanced 30k F1=0.35
 
-### Quick Start — Fusion MLP (Best Method)
+### Quick Start
 
 ```bash
-# Run Skywork Fusion MLP on 300k dataset (10% train)
+# Fusion MLP on 300k (best method)
 bash partial_labeling/scripts/run_skywork_fusion_mlp_300k.sh
-```
 
-### Quick Start — kNN Proxy Labels
-
-```bash
-# Run kNN proxy label experiment with pre-computed embeddings
+# kNN proxy labels
 python partial_labeling/run_proxy_knn_experiment.py \
   --config template.py \
   --dataset_path raw_data/tulu_300k_with_embeddings.parquet \
   --output_dir runs/proxy_knn_skywork \
-  --feature_key embed_text \
   --teacher_score_key gpt_scores \
-  --num_classes 6 \
-  --budget 0.10 \
-  --seed 3 \
-  --knn_k 50 \
-  --tau 0.1 \
-  --mode dev_teacher \
-  --output_score_key bin_score_proxy
+  --num_classes 6 --budget 0.10 --knn_k 50 --tau 0.1 \
+  --mode dev_teacher
 ```
 
-### Detailed Documentation
-
-- [partial_labeling/experimental_results.md](partial_labeling/experimental_results.md) — Full experiment log with all tables, per-class accuracy, and analysis
-- [partial_labeling/quickstart.md](partial_labeling/quickstart.md) — Task specification and developer guide
+See [partial_labeling/experimental_results.md](partial_labeling/experimental_results.md) for full experiment details.
