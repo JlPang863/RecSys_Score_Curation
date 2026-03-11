@@ -13,7 +13,7 @@ from typing import Callable
 
 
 def load_label(label_path, clean_label = None, key = None, clean_key = None):
-    noise_label = torch.load(label_path)
+    noise_label = torch.load(label_path, weights_only=False)
     if key is None: # default key is 'noisy_label'
         key = 'noisy_label'
     if clean_key is None: # default clean key is 'clean_label'
@@ -138,22 +138,22 @@ def load_embedding(idx_list: list, data_path: Callable[[int], str], duplicate = 
         div = 1
         inx_range = lambda x: list(range(idx_list[x-1]+1, idx_list[x]))
 
-    dataset = torch.load(data_path(idx_list[0])) 
+    dataset = torch.load(data_path(idx_list[0]), weights_only=False)
     # import pdb; pdb.set_trace()
 
     print(f'idx range for training data {[idx_list[0]] + inx_range(1)}')
-    for i in inx_range(1):    
-        dataset_new = torch.load(data_path(i))
+    for i in inx_range(1):
+        dataset_new = torch.load(data_path(i), weights_only=False)
         # import pdb; pdb.set_trace()
 
         dataset.update(dataset_new)
     print(f'#Samples (dataset-train) {len(dataset)//div}.')
     
     if len(idx_list) == 3:
-        test_dataset = torch.load(data_path(idx_list[1])) 
+        test_dataset = torch.load(data_path(idx_list[1]), weights_only=False)
         print(f'idx range for test data {[idx_list[1]] + inx_range(2)}')
         for i in inx_range(2):
-            dataset_new = torch.load(data_path(i))
+            dataset_new = torch.load(data_path(i), weights_only=False)
             test_dataset.update(dataset_new)
         print(f'#Samples (dataset-test) {len(test_dataset)//div}.')
     else:
@@ -166,7 +166,7 @@ def load_dataset(cfg, data_converter, data_loader):
     dataset_path = cfg.dataset_path
     os.makedirs(cfg.save_path, exist_ok=True)
     if os.path.exists(dataset_path): 
-        data = torch.load(dataset_path)
+        data = torch.load(dataset_path, weights_only=False)
         print(f'load preprocessed dataset from {dataset_path}')
         feature = data['feature']
         label = data['label']
@@ -178,7 +178,7 @@ def load_dataset(cfg, data_converter, data_loader):
         while 1:
             try:
                 dataset_path_new = dataset_path[:-3] + f'{i}' + dataset_path[-3:]
-                data = torch.load(dataset_path_new)
+                data = torch.load(dataset_path_new, weights_only=False)
                 print(f'load preprocessed dataset from {dataset_path_new}')
                 feature += data['feature']
                 label += data['label']

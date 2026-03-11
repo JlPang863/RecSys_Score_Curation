@@ -104,7 +104,7 @@ def run_curation(
     raw_dataset = dataset_load(dataset_path, split="train")
 
     # Load diagnosis report
-    reports = torch.load(report_path)
+    reports = torch.load(report_path, weights_only=False)
     print_score_heatmap(reports, dataset_name)
 
     # Score curation

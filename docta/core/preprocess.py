@@ -88,7 +88,7 @@ class Preprocess:
         if cfg.feature_type == 'embedding':
             self.encode_feature()
             print(self.save_paths)
-            dataset = torch.load(self.save_paths[0])
+            dataset = torch.load(self.save_paths[0], weights_only=False)
             data = dataset.feature
         else:
             raise NotImplementedError(f'feature_type {cfg.feature_type} not defined.')

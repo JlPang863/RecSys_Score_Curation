@@ -76,7 +76,7 @@ def run_diagnose(
 
     # Load embedding file and duplicate for detection
     print(f"[Pipeline] Loading embeddings from {embedding_file}")
-    loaded = torch.load(embedding_file)
+    loaded = torch.load(embedding_file, weights_only=False)
     n = len(loaded.feature)
     dataset = CustomizedDataset(
         feature=np.concatenate([loaded.feature, loaded.feature]),
