@@ -78,22 +78,9 @@ report = outputs["report"]
 
 ### Using Pre-computed Embeddings (No GPU Required)
 
-The pipeline supports loading pre-computed embeddings via `embedding_path`, so the score curation stage can run entirely on CPU.
+The pipeline supports loading pre-computed embeddings via `embedding_path`, skipping GPU-based encoding entirely. The `.pt` file should contain a `CustomizedDataset` with `feature` (embeddings) and `label` (scores) attributes.
 
-**Step 1**: Generate embeddings on a GPU machine (runs the normal pipeline, which saves `embedded_{dataset_name}.pt` to the output directory):
-
-```python
-pipeline = ScoreCurationPipeline(
-    config_path="template.py",
-    dataset_name="utilitarian",
-    dataset_path="raw_data/utilitarian.json",
-    output_dir="results/",
-)
-pipeline.run()
-# Produces: results/utilitarian/embedded_utilitarian.pt
-```
-
-**Step 2**: Copy the `.pt` file to a CPU machine and run curation without GPU:
+The embedding file can come from any source — for example, running the normal pipeline (which saves `embedded_{dataset_name}.pt` automatically), or your own embedding extraction script.
 
 ```python
 pipeline = ScoreCurationPipeline(
@@ -101,7 +88,7 @@ pipeline = ScoreCurationPipeline(
     dataset_name="utilitarian",
     dataset_path="raw_data/utilitarian.json",
     output_dir="results/",
-    embedding_path="results/utilitarian/embedded_utilitarian.pt",  # skip GPU encoding
+    embedding_path="path/to/embedded_utilitarian.pt",  # skip GPU encoding
 )
 outputs = pipeline.run()
 ```
