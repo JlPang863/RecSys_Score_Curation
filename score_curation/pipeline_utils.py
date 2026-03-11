@@ -32,6 +32,7 @@ class ScoreCurationPipeline:
         output_dir: str = "results",
         num_classes: int = 2,
         confidence_prob: float = 0.5,
+        embedding_path: str = None,
     ):
         """
         Initialize the score curation pipeline.
@@ -43,6 +44,8 @@ class ScoreCurationPipeline:
             feature_key: Column name for textual features used in embedding
             score_key: Column name for the original (noisy) scores
             output_dir: Directory to store reports and curated datasets
+            embedding_path: Path to a single pre-computed embedding .pt file.
+                           If provided, skip GPU encoding.
         """
         self.config_path = config_path
         self.dataset_name = dataset_name
@@ -51,6 +54,7 @@ class ScoreCurationPipeline:
         self.score_key = score_key
         self.num_classes = num_classes
         self.confidence_prob = confidence_prob
+        self.embedding_path = embedding_path
 
         # Build full output path: output_dir/dataset_name
         self.output_dir = os.path.join(output_dir, dataset_name)
@@ -94,7 +98,8 @@ class ScoreCurationPipeline:
             output_dir=self.output_dir,
             num_classes=self.num_classes,
             feature_key=self.feature_key,
-            score_key = self.score_key,
+            score_key=self.score_key,
+            embedding_path=self.embedding_path,
         )
         return self.report
 

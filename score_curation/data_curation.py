@@ -1,11 +1,9 @@
-import torch 
+import torch
 from collections import Counter
 import random
 from datasets import load_dataset
 import numpy as np
 import math
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 import argparse
 
@@ -55,7 +53,9 @@ def score_curating(reports, raw_dataset, score_key, confidence_prob):
 
 
 def print_score_heatmap(reports, dataset_name, save_path="figures/"):
-    
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
     data = reports.diagnose['T']
     plt.figure(figsize=(8, 6))
     sns.heatmap(data, annot=True, fmt=".2f", cmap="YlGnBu")

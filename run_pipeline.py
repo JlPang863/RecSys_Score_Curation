@@ -53,6 +53,11 @@ preprocess_dataset(
 # This pipeline runs:
 #   1) score diagnosis (error detection + rare pattern detection)
 #   2) score curation (confidence-based score correction + diversity scoring)
+#
+# Option: provide a pre-computed embedding .pt file to skip GPU encoding
+# e.g. embedding_path = "results/timeline_label/embedded_timeline_label.pt"
+embedding_path = None
+
 pipeline = ScoreCurationPipeline(
     config_path="template.py",                                # Model / system configuration
     dataset_name=dataset_name,                                # Dataset identifier
@@ -62,6 +67,7 @@ pipeline = ScoreCurationPipeline(
     output_dir=output_dir,                                    # Output directory
     num_classes=num_classes,
     confidence_prob=confidence_prob,
+    embedding_path=embedding_path,                            # Pre-computed embeddings (skip GPU)
 )
 
 outputs = pipeline.run()

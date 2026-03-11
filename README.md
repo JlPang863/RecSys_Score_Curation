@@ -12,6 +12,7 @@ This project applies the DS2 (ICLR 2025) framework for data score curation to re
 
 ## Project Progress
 
+- [x] **~2026.03** — Pipeline refactor: pre-computed embeddings support (`embedding_path`), removed multimodal code, single-file embedding storage, lazy imports for CPU-only curation
 - [x] **~2026.03** — Scaled Skywork Fusion MLP to 300k full dataset — Acc **0.6009**, F1 **0.5271**, AUC **0.8952**
 - [x] **~2026.02** — Comprehensive method comparison: Ensemble, Cleanlab, Self-Training, Label Propagation, C&S/APPNP, Ordinal Regression, etc.
 - [x] **~2026.02** — Supervised classifiers (MLP/ResNet) with feature fusion (Skywork embedding + 63 text features)
@@ -73,6 +74,36 @@ pipeline = ScoreCurationPipeline(
 outputs = pipeline.run()
 curated_dataset = outputs["dataset"]
 report = outputs["report"]
+```
+
+### Using Pre-computed Embeddings (No GPU Required)
+
+The pipeline supports loading pre-computed embeddings via `embedding_path`, so the score curation stage can run entirely on CPU.
+
+**Step 1**: Generate embeddings on a GPU machine (runs the normal pipeline, which saves `embedded_{dataset_name}.pt` to the output directory):
+
+```python
+pipeline = ScoreCurationPipeline(
+    config_path="template.py",
+    dataset_name="utilitarian",
+    dataset_path="raw_data/utilitarian.json",
+    output_dir="results/",
+)
+pipeline.run()
+# Produces: results/utilitarian/embedded_utilitarian.pt
+```
+
+**Step 2**: Copy the `.pt` file to a CPU machine and run curation without GPU:
+
+```python
+pipeline = ScoreCurationPipeline(
+    config_path="template.py",
+    dataset_name="utilitarian",
+    dataset_path="raw_data/utilitarian.json",
+    output_dir="results/",
+    embedding_path="results/utilitarian/embedded_utilitarian.pt",  # skip GPU encoding
+)
+outputs = pipeline.run()
 ```
 
 ---

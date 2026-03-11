@@ -4,12 +4,12 @@ o_path = os.getcwd()
 sys.path.append(o_path) # set path so that modules from other foloders can be loaded
 
 import torch
+import numpy as np
 import argparse
 
 from docta.utils.config import Config
-from docta.datasets import RecSysDataset
+from docta.datasets import RecSysDataset, CustomizedDataset
 from docta.core.preprocess import Preprocess
-from docta.datasets.data_utils import load_embedding
 from docta.apis import DetectLabel, DetectFeature
 from docta.core.report import Report
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -36,6 +36,7 @@ def run_diagnose(
     num_classes: int | None = None,
     feature_key: str | None = None,
     score_key: str | None = None,
+    embedding_path: str | None = None,
 ):
     # config setup
     cfg.dataset_type = dataset_name
@@ -52,26 +53,37 @@ def run_diagnose(
     if num_classes is not None:
         cfg.num_classes = num_classes
 
-    # -------- dataset --------
-    args_like = argparse.Namespace(
-        dataset_path=dataset_path,
-        dataset_name=dataset_name,
-        feature_key=cfg.feature_key,
-        score_key=cfg.score_key,
-        output_dir=output_dir,
-        num_classes=cfg.num_classes,
-    )
-
-    dataset = RecSysDataset(cfg, args_like, split="train")
-
     '''preprocess data'''
-    pre_processor = Preprocess(cfg, dataset)
-    pre_processor.encode_feature()
-    print(pre_processor.save_ckpt_idx) #[start_idx, end_idx (not-include)]
+    if embedding_path is not None:
+        # Use pre-computed embeddings directly (no GPU, no dataset_path needed for diagnosis)
+        if not os.path.exists(embedding_path):
+            raise FileNotFoundError(f"Embedding file not found: {embedding_path}")
+        embedding_file = embedding_path
+    else:
+        # Need raw dataset for encoding
+        args_like = argparse.Namespace(
+            dataset_path=dataset_path,
+            dataset_name=dataset_name,
+            feature_key=cfg.feature_key,
+            score_key=cfg.score_key,
+            output_dir=output_dir,
+            num_classes=cfg.num_classes,
+        )
+        dataset = RecSysDataset(cfg, args_like, split="train")
+        pre_processor = Preprocess(cfg, dataset)
+        pre_processor.encode_feature()
+        embedding_file = os.path.join(cfg.save_path, f'embedded_{cfg.dataset_type}.pt')
 
-
-    data_path = lambda x: os.path.join(cfg.save_path, f'embedded_{cfg.dataset_type}_{x}.pt')
-    dataset, _ = load_embedding(pre_processor.save_ckpt_idx, data_path, duplicate=True) ## duplicate dataset
+    # Load embedding file and duplicate for detection
+    print(f"[Pipeline] Loading embeddings from {embedding_file}")
+    loaded = torch.load(embedding_file)
+    n = len(loaded.feature)
+    dataset = CustomizedDataset(
+        feature=np.concatenate([loaded.feature, loaded.feature]),
+        label=np.concatenate([loaded.label, loaded.label]),
+        index=np.concatenate([np.arange(n), np.arange(n)]),
+    )
+    print(f"#Samples (dataset-train) {n}.")
 
 
     '''detect data'''

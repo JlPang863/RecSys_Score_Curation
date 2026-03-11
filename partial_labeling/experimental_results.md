@@ -987,6 +987,64 @@ Fusion MLP 在所有 train ratio 下都大幅优于 kNN, 且优势稳定在 ~8% 
 - **更多特征 vs 更多数据**: 增加特征 (35→63) 无效, 增加数据量效果显著
 - **所有"高级"方法均无效**: Ensemble, Cleanlab, Self-Training, Label Propagation, C&S, APPNP, Denoise, Focal Loss 均未超过简单的 Fusion MLP baseline
 
+### 6.5 高质量样本选择效果评估 (Selection Metrics, score ≥ 4)
+
+**应用场景**: 用 proxy label 对数据按质量排序, 选出高质量样本 (score ≥ 4) 用于下游训练。6 分类 accuracy 仅 57-60%, 但实际选择效果如何?
+
+**评估指标**:
+- **Binary AUC (≥4 vs <4)**: 模型区分"高质量 vs 非高质量"的排序能力
+- **Precision@k**: 选出的 top k% 样本中, 真正 score ≥ 4 的比例
+- **Recall@k**: 所有真实 score ≥ 4 的样本中, 被 top k% 覆盖的比例
+
+**模型**: Skywork Fusion MLP (4096d emb + 63 text features, h=256, 1.13M params)
+
+**代码**: `partial_labeling/scripts/compute_selection_metrics.py`
+
+#### 300k 数据池 — 不同 train ratio 的选择效果
+
+**10% train (30k 标注 → 270k proxy label, 测试集中真实 score≥4 占 21.27%)**:
+
+| Top k% | 选出数量 | Precision | Recall | 富集倍数 |
+|--------|---------|-----------|--------|---------|
+| 1% | 2,700 | 89.9% | 4.2% | 4.2x |
+| 2% | 5,400 | 92.9% | 8.7% | 4.4x |
+| **3%** | **8,100** | **93.7%** | **13.2%** | **4.4x** |
+| 5% | 13,500 | 93.5% | 22.0% | 4.4x |
+| 10% | 27,000 | 89.7% | 42.2% | 4.2x |
+| 15% | 40,500 | 83.0% | 58.5% | 3.9x |
+| 20% | 54,000 | 75.3% | 70.8% | 3.5x |
+| 30% | 81,000 | 61.3% | 86.5% | 2.9x |
+
+*富集倍数 = Precision / 真实高质量占比 (21.27%), 表示模型将高质量样本浓度提高了多少倍。
+
+#### Scaling: 更多标注数据 → 更好的选择效果
+
+| Train Ratio | Binary AUC | P@3 | P@5 | P@10 | P@20 | R@20 |
+|-------------|-----------|------|------|------|------|------|
+| **10%** (30k) | 0.9351 | 93.7% | 93.5% | 89.7% | 75.3% | 70.8% |
+| 50% (150k) | 0.9453 | 96.5% | 96.3% | 92.1% | 77.5% | 72.9% |
+| 70% (210k) | 0.9470 | 96.7% | 96.6% | 92.4% | 77.8% | 73.1% |
+| 90% (270k) | 0.9489 | 97.6% | 96.9% | 93.0% | 78.8% | 73.4% |
+| 95% (285k) | 0.9498 | 98.0% | 97.6% | 94.7% | 79.7% | 73.5% |
+
+#### Per-Class AUC (高分类)
+
+| Train Ratio | Class 4 AUC | Class 5 AUC | Binary AUC (≥4) |
+|-------------|------------|------------|-----------------|
+| 10% | 0.9204 | 0.9404 | 0.9351 |
+| 50% | 0.9312 | 0.9491 | 0.9453 |
+| 70% | 0.9331 | 0.9527 | 0.9470 |
+| 90% | 0.9351 | 0.9540 | 0.9489 |
+| 95% | 0.9359 | 0.9625 | 0.9498 |
+
+#### 关键发现
+
+1. **6 分类 accuracy 低 ≠ 选择效果差**: Accuracy 仅 56.7% (10% train), 但 Binary AUC=0.935, top 3-5% precision 达 **93-94%**。原因: accuracy 主要被相邻类 (2↔3) 的误分类拖累, 但这些误分类不影响 "高质量 vs 非高质量" 的排序
+2. **Top 2-5% 是 precision 甜蜜区**: Precision 峰值在 top 3% (93.7%), 之后随 k 增大逐渐下降。Top 1% 反而略低 (89.9%), 因为模型最极端的预测中包含少量过度自信的错误
+3. **富集效果显著 (~4.4x)**: 原始数据中高质量占 21%, 模型选出的 top 3-5% 中高质量占 93-94%, 浓度提高 4.4 倍
+4. **10% 标注已足够实用**: 仅用 10% 标注 (30k) 训练, Binary AUC 即达 0.935; 增加到 95% 标注仅提升至 0.950。说明 10% 标注对选择任务已有足够信号
+5. **Class 5 (最高质量) AUC 最高 (0.94)**: 虽然 class 5 的分类 accuracy 仅 7.8%, 但其 AUC=0.94 说明模型能识别这些样本, 只是概率输出不够高导致 argmax 选不到
+
 ---
 
 ## 7. 核心结论
@@ -1000,6 +1058,7 @@ Fusion MLP 在所有 train ratio 下都大幅优于 kNN, 且优势稳定在 ~8% 
 7. **类别不平衡是 Macro F1 低的主因 (已验证)**: 均衡 18k 上 F1 从 0.35-0.43 提升至 **0.47-0.57** (+10~14%); 300k 全量中少数类训练样本增多后 F1 也显著改善 (0.4841 vs 30k 的 0.3455)。
 8. **所有后处理/噪声修正方法均失败**: Cleanlab, ScoreCuration Denoise, C&S, APPNP — 核心原因是 embedding 空间中的相似度不反映质量相似度 (mean cosine sim=0.991), 任何基于 embedding 图的方法在此设定下都会失败。
 9. **Class 5 仍是最难类**: 即使 300k 95% train (~3700 训练样本), class 5 准确率仅 13.4%。极端少数类需要更根本的解决方案 (如更强的 embedding 或主动标注)。
+10. **Accuracy 低 ≠ 选择效果差**: 6 分类 accuracy 仅 57%, 但 Binary AUC (score≥4 vs <4) 达 0.935, top 3-5% precision 达 93-94%。对于下游"选出高质量样本"的任务, 模型表现远好于 accuracy 指标所暗示的水平。误分类主要集中在相邻中等类 (2↔3), 不影响高质量 vs 非高质量的区分。
 
 ---
 
@@ -1054,3 +1113,5 @@ Fusion MLP 在所有 train ratio 下都大幅优于 kNN, 且优势稳定在 ~8% 
 | `run_skywork_fusion_mlp_300k.sh` | Skywork Fusion MLP 300k 全量 (5 train ratios) |
 | `run_denoise_proxy_labels.py` | ScoreCuration 去噪实验 (SimiFeat 检测 + 修正 proxy labels) |
 | `plot_denoise_transition_matrix.py` | 去噪实验 transition matrix 可视化 |
+| `partial_labeling/scripts/compute_auc_all.py` | 批量计算所有实验的 macro/weighted/per-class AUC |
+| `partial_labeling/scripts/compute_selection_metrics.py` | 高质量样本选择效果评估 (Binary AUC, Precision@k, Recall@k) |

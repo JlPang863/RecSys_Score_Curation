@@ -1,8 +1,6 @@
 # dataset settings
 seed = 0
-modality = 'text' # image, text, tabular
 num_classes = 2  ## Number of score categories
-
 
 feature_type = 'embedding'
 details = False
