@@ -138,5 +138,4 @@ python partial_labeling/run_proxy_knn_experiment.py \
 See [partial_labeling/experimental_results.md](partial_labeling/experimental_results.md) for full experiment details.
 
 
-[Google Extension Proposal][https://docs.google.com/document/d/1O85_mGAal_rNCqa7xvykEGI50E0bWnnJ3HXPPmkky5o/edit?tab=t.0]
-https://docs.google.com/document/d/1O85_mGAal_rNCqa7xvykEGI50E0bWnnJ3HXPPmkky5o/edit?tab=t.0
+[Google Extension Proposal](https://docs.google.com/document/d/1O85_mGAal_rNCqa7xvykEGI50E0bWnnJ3HXPPmkky5o/edit?tab=t.0)
